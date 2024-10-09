@@ -1,6 +1,11 @@
 package ru.pirum1ch.cloudsave.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +42,7 @@ public class User implements UserDetails {
 
     @Override
     public String toString() {
-        return "User: " + "name= '" + name + ", surname= '" + surname + ", login= '" + login;
+        return "User: name= '" + name + ", surname= '" + surname + ", login= '" + login;
     }
 
     @Override
