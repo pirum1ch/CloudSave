@@ -6,7 +6,6 @@ import ru.pirum1ch.cloudsave.models.File;
 
 public interface FileRepo extends JpaRepository <File, Long> {
 
-    @Query()
-    public upload ("insert into uploads (name, size, key, extention, upload, uploadDate) values ")
-
+    @Override
+    <S extends File> S save(S entity);
 }

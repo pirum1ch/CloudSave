@@ -6,10 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 import java.util.Objects;
@@ -19,6 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Setter
 @Getter
+@Builder(toBuilder = true)
 @Table(name = "uploads")
 public class File {
 
