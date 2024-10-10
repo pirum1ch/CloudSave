@@ -33,11 +33,14 @@ public class File {
     @Column(name = "size")
     private Long size;
 
+    @Column(name = "key")
+    private String key;
+
     @Column(name = "extention")
     private String extention;
 
-    @Column(name = "date_of_upload")
-    private Date dateOfCreation;
+    @Column(name = "uploadDate")
+    private Date uploadDate;
 
 
     @Override
@@ -45,7 +48,7 @@ public class File {
         return "File name= '" + name + '\'' +
                 ", size=" + size +
                 ", extention='" + extention + '\'' +
-                ", dateOfCreation=" + dateOfCreation +
+                ", dateOfCreation=" + uploadDate +
                 ';';
     }
 
@@ -56,12 +59,13 @@ public class File {
         File file = (File) o;
         return Objects.equals(name, file.name)
                 && Objects.equals(size, file.size)
+                && Objects.equals(key, file.key)
                 && Objects.equals(extention, file.extention)
-                && Objects.equals(dateOfCreation, file.dateOfCreation);
+                && Objects.equals(uploadDate, file.uploadDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size, extention, dateOfCreation);
+        return Objects.hash(name, size, key, extention, uploadDate);
     }
 }
