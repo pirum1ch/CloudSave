@@ -11,12 +11,12 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/file")
-public class UploadController {
+@RequestMapping("/cloud/file")
+public class FileController {
 
     private FileService fileService;
 
-    public UploadController(FileService fileService) {
+    public FileController(FileService fileService) {
         this.fileService = fileService;
     }
 
@@ -30,17 +30,25 @@ public class UploadController {
     }
 
     @DeleteMapping
-    public String delite(String file){
+    public ResponseEntity<File> delete(String file){
         return null;
     }
 
     @GetMapping
-    public List<String> getListOfAllFiles(){
-        return null;
+    public ResponseEntity<File> getFileByName(@RequestParam String fileName){
+        try {
+            File foundFile = fileService.;
+            Resource resource = fileService.download(foundFile.getKey());
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + foundFile.getName())
+                    .body(resource);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping
-    public String updateFile (String file){
+    public ResponseEntity<File> updateFile (String file){
         return null;
     }
 }
