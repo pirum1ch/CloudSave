@@ -1,6 +1,8 @@
 package ru.pirum1ch.cloudsave.utils;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
@@ -35,7 +37,7 @@ public class FileManager {
     }
 
     public Resource download(String key) throws IOException {
-        Path path = Paths.get(DIRECTORY_PATH + key);
+        Path path = Paths.get(directoryToLoad + key);
         Resource resource = new UrlResource(path.toUri());
         if (resource.exists() || resource.isReadable()) {
             return resource;

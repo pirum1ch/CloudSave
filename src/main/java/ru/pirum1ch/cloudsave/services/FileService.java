@@ -1,6 +1,7 @@
 package ru.pirum1ch.cloudsave.services;
 
-import lombok.Data;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,5 +37,10 @@ public class FileService {
         fileRepo.save(uploadedFile);
         fileManager.fileUpload(file.getBytes(), key);
         return uploadedFile;
+    }
+
+    public Resource download (String name) throws IOException {
+        File foundFile = fileRepo.findByName(name);
+        return fileManager.download(foundFile.getKey());
     }
 }

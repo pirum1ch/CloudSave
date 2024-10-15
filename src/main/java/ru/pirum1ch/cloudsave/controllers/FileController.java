@@ -1,6 +1,7 @@
 package ru.pirum1ch.cloudsave.controllers;
 
 import org.apache.tomcat.jni.FileInfo;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +38,7 @@ public class FileController {
     @GetMapping
     public ResponseEntity<File> getFileByName(@RequestParam String fileName){
         try {
-            File foundFile = fileService.;
-            Resource resource = fileService.download(foundFile.getKey());
+            Resource resource = fileService.download(fileName);
             return ResponseEntity.ok()
                     .header("Content-Disposition", "attachment; filename=" + foundFile.getName())
                     .body(resource);
