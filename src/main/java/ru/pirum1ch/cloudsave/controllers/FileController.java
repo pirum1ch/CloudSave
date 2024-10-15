@@ -36,11 +36,12 @@ public class FileController {
     }
 
     @GetMapping
-    public ResponseEntity<File> getFileByName(@RequestParam String fileName){
+    public ResponseEntity<Resource> getFileByName(@RequestParam String fileName){
         try {
             Resource resource = fileService.download(fileName);
+//            String foundFile = resource.getFile().getName();
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + foundFile.getName())
+                    .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
                     .body(resource);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
