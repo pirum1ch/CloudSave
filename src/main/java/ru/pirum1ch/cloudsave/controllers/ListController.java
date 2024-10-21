@@ -11,8 +11,6 @@ import java.util.List;
 @RequestMapping("/list")
 public class ListController {
 
-
-
     @GetMapping
     public List<File> getAllFiles (){
         return null;
