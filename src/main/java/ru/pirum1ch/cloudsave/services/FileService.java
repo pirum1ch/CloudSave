@@ -10,6 +10,7 @@ import ru.pirum1ch.cloudsave.utils.FileManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.Date;
 
 @Service
@@ -44,9 +45,19 @@ public class FileService {
         return fileManager.download(foundFile.getKey());
     }
 
-    public Resource fileNameUpdate (String fileName){
+    @Transactional(rollbackFor = {IOException.class})
+    public String fileUpdateByName (String fileName, MultipartFile file) throws IOException {
         File foundFile = fileRepo.findByName(fileName);
-        return null;
+        if (foundFile.getSize() <= 0){
+            throw new NoSuchFileException(fileName);
+        }
+        String oldFileKey = foundFile.getKey();
+        String newFileKey = fileManager.generateKey(file.getName());
+        //TODO Не работает
+        fileManager.fileUpload(file.getBytes(), newFileKey);
+        fileRepo.changeFileByName(newFileKey, file.getOriginalFilename());
+        fileManager.deleteFile(oldFileKey);
+        return foundFile.getName();
     }
 
     @Transactional(rollbackFor = {IOException.class, FileNotFoundException.class})

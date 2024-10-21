@@ -49,7 +49,8 @@ public class FileController {
         try {
             Resource resource = fileService.download(fileName);
 //            String foundFile = resource.getFile().getName();
-            return ResponseEntity.ok()
+            return ResponseEntity
+                    .ok()
                     .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
                     .body(resource);
         } catch (IOException e) {
@@ -58,7 +59,14 @@ public class FileController {
     }
 
     @PutMapping
-    public ResponseEntity<File> updateFile (String file){
-        return null;
+    public ResponseEntity<File> editFileName (@RequestParam ("filename") String fileName, @RequestParam MultipartFile file){
+        try{
+            fileService.fileUpdateByName(fileName, file);
+        }catch (FileNotFoundException notFoundException){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (IOException ioException){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
