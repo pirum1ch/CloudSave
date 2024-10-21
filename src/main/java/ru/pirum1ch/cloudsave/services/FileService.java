@@ -1,6 +1,5 @@
 package ru.pirum1ch.cloudsave.services;
 
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +8,7 @@ import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.repositories.FileRepo;
 import ru.pirum1ch.cloudsave.utils.FileManager;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 
@@ -39,8 +39,22 @@ public class FileService {
         return uploadedFile;
     }
 
-    public Resource download (String name) throws IOException {
-        File foundFile = fileRepo.findByName(name);
+    public Resource download (String filename) throws IOException {
+        File foundFile = fileRepo.findByName(filename);
         return fileManager.download(foundFile.getKey());
+    }
+
+    public Resource fileNameUpdate (String newFileName){
+        return null;
+    }
+
+    public void deleteFile(String filename) throws IOException {
+        File foundFile = fileRepo.findByName(filename);
+        if (foundFile.getSize()>0){
+            fileManager.deleteFile(foundFile.getKey());
+        }else{
+            throw new FileNotFoundException();
+        }
+        fileRepo.delete(foundFile);
     }
 }

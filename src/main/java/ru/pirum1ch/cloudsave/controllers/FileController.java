@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.services.FileService;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -31,12 +33,19 @@ public class FileController {
     }
 
     @DeleteMapping
-    public ResponseEntity<File> delete(String file){
-        return null;
+    public ResponseEntity<File> delete(@RequestParam ("filename") String fileName){
+        try{
+            fileService.deleteFile(fileName);
+        }catch (FileNotFoundException notFoundException){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (IOException ioException){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping
-    public ResponseEntity<Resource> getFileByName(@RequestParam String fileName){
+    public ResponseEntity<Resource> getFileByName(@RequestParam("filename") String fileName){
         try {
             Resource resource = fileService.download(fileName);
 //            String foundFile = resource.getFile().getName();
