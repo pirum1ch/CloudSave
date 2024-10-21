@@ -39,15 +39,17 @@ public class FileService {
         return uploadedFile;
     }
 
-    public Resource download (String filename) throws IOException {
-        File foundFile = fileRepo.findByName(filename);
+    public Resource download (String fileName) throws IOException {
+        File foundFile = fileRepo.findByName(fileName);
         return fileManager.download(foundFile.getKey());
     }
 
-    public Resource fileNameUpdate (String newFileName){
+    public Resource fileNameUpdate (String fileName){
+        File foundFile = fileRepo.findByName(fileName);
         return null;
     }
 
+    @Transactional(rollbackFor = {IOException.class, FileNotFoundException.class})
     public void deleteFile(String filename) throws IOException {
         File foundFile = fileRepo.findByName(filename);
         if (foundFile.getSize()>0){
