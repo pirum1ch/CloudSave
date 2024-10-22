@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.utils;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -22,8 +23,8 @@ public class FileManager {
 //    String directoryToLoad = "C:\\Develop\\study\\CloudSave\\src\\main\\resources\\load\\";
 //    String directoryToLoad = "\\src\\main\\resources\\load";
 
-    //TODO вывести в проперти
-    private final String DIRECTORY_TO_LOAD = "src/main/resources/load/";
+    @Value("${directory.to.load}")
+    private String DIRECTORY_TO_LOAD;
 
     public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
         Path path = Paths.get(DIRECTORY_TO_LOAD, key).toAbsolutePath();
