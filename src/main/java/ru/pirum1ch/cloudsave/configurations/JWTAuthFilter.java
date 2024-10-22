@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.pirum1ch.cloudsave.services.CustomUserDetailService;
 import ru.pirum1ch.cloudsave.services.JwtService;
-import ru.pirum1ch.cloudsave.services.UserService;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -29,7 +28,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     public static final String HEADER_NAME = "Authorization";
 
     private final JwtService jwtService;
-//    private final UserService userService;
     private final CustomUserDetailService customUserDetailService;
 
     @Override
@@ -51,9 +49,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         var username = jwtService.extractUserName(jwt);
 
         if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
-//            UserDetails userDetails = userService
-//                    .userDetailsService()
-//                    .loadUserByUsername(username);
             UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 
             // Если токен валиден, то аутентифицируем пользователя
