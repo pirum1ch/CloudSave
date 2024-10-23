@@ -12,8 +12,5 @@ public interface FileRepo extends JpaRepository <File, Long> {
 
     File findByName(String name);
 
-    @Modifying
-    @Query(value = "UPDATE File set key= :key where name = :fileName")
-    void changeFileByName(String key, String fileName);
 
 }

@@ -25,6 +25,10 @@ public class AuthController {
         return authService.login(request);
     }
 
+    public void logout (){
+
+    }
+
     @PostMapping("sign-up")
     public TokenAuthResponce signUp(@RequestBody @Valid SignRequest request) {
         return authService.signUp(request);

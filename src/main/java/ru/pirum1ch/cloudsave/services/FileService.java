@@ -71,7 +71,7 @@ public class FileService {
     }
 
     @Transactional(rollbackFor = {IOException.class})
-    public String fileUpdateByName (String fileName, MultipartFile file) throws IOException {
+        public String fileUpdateByName (String fileName, MultipartFile file) throws IOException {
         File foundFile = fileRepo.findByName(fileName);
         if (foundFile.getSize() <= 0){
             throw new NoSuchFileException(fileName);
@@ -79,8 +79,10 @@ public class FileService {
         String oldFileKey = foundFile.getKey();
         String newFileKey = fileManager.generateKey(file.getName());
         //TODO Не работает
+        foundFile.setName(file.getName());
+        foundFile.setKey(newFileKey);
         fileManager.fileUpload(file.getBytes(), newFileKey);
-        fileRepo.changeFileByName(newFileKey, file.getOriginalFilename());
+        fileRepo.save(foundFile);
         fileManager.deleteFile(oldFileKey);
         return foundFile.getName();
     }
