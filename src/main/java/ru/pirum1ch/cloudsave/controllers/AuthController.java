@@ -25,7 +25,7 @@ public class AuthController {
         return authService.login(request);
     }
 
-    public void logout (){
+    public void logout() {
 
     }
 

@@ -20,14 +20,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public TokenAuthResponce login(LoginRequest request){
+    public TokenAuthResponce login(LoginRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
         String token = jwtService.generateToken(user);
         return new TokenAuthResponce(token);
     }
 
-    public TokenAuthResponce signUp (SignRequest request){
+    public TokenAuthResponce signUp(SignRequest request) {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
