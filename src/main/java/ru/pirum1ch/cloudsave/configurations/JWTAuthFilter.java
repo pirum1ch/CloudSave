@@ -21,13 +21,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Auth-Token";
 
     private final JwtService jwtService;
     private final CustomUserDetailService customUserDetailService;
+    public JWTAuthFilter(JwtService jwtService, CustomUserDetailService customUserDetailService) {
+        this.jwtService = jwtService;
+        this.customUserDetailService = customUserDetailService;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -37,15 +40,15 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // Получаем токен из заголовка
-        var authHeader = request.getHeader(HEADER_NAME);
+        String authHeader = request.getHeader(HEADER_NAME);
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         // Обрезаем префикс и получаем имя пользователя из токена
-        var jwt = authHeader.substring(BEARER_PREFIX.length());
-        var username = jwtService.extractUserName(jwt);
+        String jwt = authHeader.substring(BEARER_PREFIX.length());
+        String username = jwtService.extractUserName(jwt);
 
         if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailService.loadUserByUsername(username);

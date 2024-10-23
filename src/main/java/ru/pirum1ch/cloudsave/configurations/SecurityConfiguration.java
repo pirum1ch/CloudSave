@@ -27,7 +27,6 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
     private final CustomUserDetailService customUserDetailService;
     private final JWTAuthFilter jwtAuthFilter;
 

@@ -2,6 +2,7 @@ package ru.pirum1ch.cloudsave.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +21,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public TokenAuthResponce login(LoginRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
-        UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
-        String token = jwtService.generateToken(user);
+    public TokenAuthResponce login(LoginRequest request) throws BadCredentialsException {
+        String token = null;
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
+            UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
+             token = jwtService.generateToken(user);
+        }catch (Exception exception){
+            exception.getLocalizedMessage();
+        }
         return new TokenAuthResponce(token);
     }
 
