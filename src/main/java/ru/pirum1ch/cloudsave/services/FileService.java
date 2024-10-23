@@ -13,6 +13,7 @@ import ru.pirum1ch.cloudsave.utils.FileManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,29 +29,28 @@ public class FileService {
         this.fileManager = fileManager;
     }
 
-    public List<FileDto> getListOfAllFiles(int limit){
+    public List<FileDto> getListOfAllFiles(int limit) {
         List<File> list = fileRepo.findAll();
+        int listsize = list.size();
+
         List<FileDto> listdto = new LinkedList<>();
 
-        for (int i=0; i<limit; i++){
+        if (listsize < limit) {
+            limit = listsize;
+        }
+
+        for (int i = 0; i < limit; i++) {
             listdto.add(FileDto.builder()
-                    .filename (list.get(i).getName())
+                    .filename(list.get(i).getName())
                     .size(list.get(i).getSize())
                     .build());
         }
 
-//        for(File file : list){
-//            listdto.add(File.builder()
-//                    .name(file.getName())
-//                    .size(file.getSize())
-//                    .build());
-//        }
-        
         return listdto;
     }
 
     @Transactional(rollbackFor = {IOException.class})
-    public File upload (MultipartFile file) throws IOException {
+    public File upload(MultipartFile file) throws IOException {
         Date date = new Date();
         String key = fileManager.generateKey(file.getName());
         File uploadedFile = File.builder()
@@ -65,15 +65,15 @@ public class FileService {
         return uploadedFile;
     }
 
-    public Resource download (String fileName) throws IOException {
+    public Resource download(String fileName) throws IOException {
         File foundFile = fileRepo.findByName(fileName);
         return fileManager.download(foundFile.getKey());
     }
 
     @Transactional(rollbackFor = {IOException.class})
-        public String fileUpdateByName (String fileName, MultipartFile file) throws IOException {
+    public String fileUpdateByName(String fileName, MultipartFile file) throws IOException {
         File foundFile = fileRepo.findByName(fileName);
-        if (foundFile.getSize() <= 0){
+        if (foundFile.getSize() <= 0) {
             throw new NoSuchFileException(fileName);
         }
         String oldFileKey = foundFile.getKey();
@@ -87,12 +87,23 @@ public class FileService {
         return foundFile.getName();
     }
 
+    public File fileNameUpdate(String fileName, String name) throws FileNotFoundException {
+        File foundFile = fileRepo.findByName(fileName);
+        if (foundFile == null) {
+            throw new FileNotFoundException();
+        }
+        String nameNew = name.substring(13, 20);
+        foundFile.setName(nameNew);
+        fileRepo.save(foundFile);
+        return foundFile;
+    }
+
     @Transactional(rollbackFor = {IOException.class, FileNotFoundException.class})
     public void deleteFile(String filename) throws IOException {
         File foundFile = fileRepo.findByName(filename);
-        if (foundFile.getSize()>0){
+        if (foundFile.getSize() > 0) {
             fileManager.deleteFile(foundFile.getKey());
-        }else{
+        } else {
             throw new FileNotFoundException();
         }
         fileRepo.delete(foundFile);
