@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cloud/file")
+@RequestMapping("/file")
 public class FileController {
 
     private FileService fileService;
@@ -24,31 +24,30 @@ public class FileController {
     }
 
     @PostMapping
-    public ResponseEntity<File> upload (@RequestParam MultipartFile file){
+    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) {
         try {
             return new ResponseEntity<>(fileService.upload(file), HttpStatus.ACCEPTED);
-        }catch (IOException ioException) {
+        } catch (IOException ioException) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @DeleteMapping
-    public ResponseEntity<File> delete(@RequestParam ("filename") String fileName){
-        try{
+    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) {
+        try {
             fileService.deleteFile(fileName);
-        }catch (FileNotFoundException notFoundException){
+        } catch (FileNotFoundException notFoundException) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (IOException ioException){
+        } catch (IOException ioException) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping
-    public ResponseEntity<Resource> getFileByName(@RequestParam("filename") String fileName){
+    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName) {
         try {
             Resource resource = fileService.download(fileName);
-//            String foundFile = resource.getFile().getName();
             return ResponseEntity
                     .ok()
                     .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
@@ -59,12 +58,12 @@ public class FileController {
     }
 
     @PutMapping
-    public ResponseEntity<File> editFileName (@RequestParam ("filename") String fileName, @RequestParam MultipartFile file){
-        try{
-            fileService.fileUpdateByName(fileName, file);
-        }catch (FileNotFoundException notFoundException){
+    public ResponseEntity<File> editFileName(@RequestParam("filename") String fileName, @RequestBody String name) {
+        try {
+            fileService.fileNameUpdate(fileName, name);
+        } catch (FileNotFoundException notFoundException) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (IOException ioException){
+        } catch (IOException ioException) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
