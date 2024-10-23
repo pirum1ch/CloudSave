@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cloud/file")
+@RequestMapping("/file")
 public class FileController {
 
     private FileService fileService;
@@ -24,7 +24,7 @@ public class FileController {
     }
 
     @PostMapping
-    public ResponseEntity<File> upload (@RequestParam MultipartFile file){
+    public ResponseEntity<File> upload (@RequestParam("filename") String filename, @RequestParam MultipartFile file){
         try {
             return new ResponseEntity<>(fileService.upload(file), HttpStatus.ACCEPTED);
         }catch (IOException ioException) {
@@ -45,10 +45,9 @@ public class FileController {
     }
 
     @GetMapping
-    public ResponseEntity<Resource> getFileByName(@RequestParam("filename") String fileName){
+    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName){
         try {
             Resource resource = fileService.download(fileName);
-//            String foundFile = resource.getFile().getName();
             return ResponseEntity
                     .ok()
                     .header("Content-Disposition", "attachment; filename=" + resource.getFilename())

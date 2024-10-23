@@ -24,8 +24,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
-//    public static final String HEADER_NAME = "auth-token";
-    public static final String HEADER_NAME = "Authorization";
+//    public static final String HEADER_NAME = "Authorization";
+    public static final String HEADER_NAME = "Auth-Token";
 
     private final JwtService jwtService;
     private final CustomUserDetailService customUserDetailService;

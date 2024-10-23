@@ -40,8 +40,8 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> corsConfigurationSource())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("login", "sign-up").permitAll()
-                        .requestMatchers("/cloud/**").authenticated()
+                        .requestMatchers("login", "sign-up", "logout").permitAll()
+                        .requestMatchers("/**").authenticated()
                 )
 
                 .authenticationProvider(authProvider())
@@ -54,7 +54,7 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource(){
         log.log(Level.INFO, "CORS configuration doing");
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("*"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:8081"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
@@ -80,5 +80,13 @@ public class SecurityConfiguration {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(8);
     }
+
+//    @Bean
+//    public DefaultTokenServices tokenServices() {
+//        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+//        defaultTokenServices.setTokenStore(tokenStore());
+//        defaultTokenServices.setSupportRefreshToken(true);
+//        return defaultTokenServices;
+//    }
 
 }

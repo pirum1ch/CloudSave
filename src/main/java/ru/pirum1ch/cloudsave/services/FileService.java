@@ -1,9 +1,11 @@
 package ru.pirum1ch.cloudsave.services;
 
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.repositories.FileRepo;
 import ru.pirum1ch.cloudsave.utils.FileManager;
@@ -12,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -22,6 +26,27 @@ public class FileService {
     public FileService(FileRepo fileRepo, FileManager fileManager) {
         this.fileRepo = fileRepo;
         this.fileManager = fileManager;
+    }
+
+    public List<FileDto> getListOfAllFiles(int limit){
+        List<File> list = fileRepo.findAll();
+        List<FileDto> listdto = new LinkedList<>();
+
+        for (int i=0; i<limit; i++){
+            listdto.add(FileDto.builder()
+                    .filename (list.get(i).getName())
+                    .size(list.get(i).getSize())
+                    .build());
+        }
+
+//        for(File file : list){
+//            listdto.add(File.builder()
+//                    .name(file.getName())
+//                    .size(file.getSize())
+//                    .build());
+//        }
+        
+        return listdto;
     }
 
     @Transactional(rollbackFor = {IOException.class})

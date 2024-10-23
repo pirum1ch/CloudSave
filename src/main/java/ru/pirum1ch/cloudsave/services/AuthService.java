@@ -21,14 +21,13 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public TokenAuthResponce login(LoginRequest request){
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        UserDetails user = customUserDetailService.loadUserByUsername(request.getEmail());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
+        UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
         String token = jwtService.generateToken(user);
         return new TokenAuthResponce(token);
     }
 
     public TokenAuthResponce signUp (SignRequest request){
-
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -37,4 +36,8 @@ public class AuthService {
         String token = jwtService.generateToken(user);
         return new TokenAuthResponce(token);
     }
+
+//    public void logout(LoginRequest request){
+//        DefaultToken Services
+//    }
 }
