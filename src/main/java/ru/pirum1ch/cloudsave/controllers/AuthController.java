@@ -2,9 +2,11 @@ package ru.pirum1ch.cloudsave.controllers;
 
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.pirum1ch.cloudsave.dto.requests.LoginRequest;
@@ -26,12 +28,8 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<TokenAuthResponce> login(@RequestBody @Valid LoginRequest request) {
-        try{
-            return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
-        }catch (BadCredentialsException badCredentialsException){
-            badCredentialsException.getLocalizedMessage();;
-            return new ResponseEntity<> (HttpStatus.BAD_REQUEST);
-        }
+        log.log(Level.INFO, "Попытка авторизации пользователя " + request.getLogin());
+        return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 
     public void logout() {

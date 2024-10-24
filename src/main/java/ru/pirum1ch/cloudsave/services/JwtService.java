@@ -22,6 +22,10 @@ public class JwtService {
     @Value("${token.signing.key}")
     private String jwtSigningKey;
 
+    //В данной конфигурации токен живет 10 минут
+    @Value("${token.time.to.live}")
+    private int tokenTimeToLive = 600000;
+
 
     /**
      * Извлечение имени пользователя из токена
@@ -81,9 +85,12 @@ public class JwtService {
      * @return токен
      */
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
+//                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenTimeToLive))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
     }
 
