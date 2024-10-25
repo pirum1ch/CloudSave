@@ -34,22 +34,14 @@ public class FileController {
      */
 
     @PostMapping
-    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) {
-        try {
-            log.log(Level.INFO, "Загрузка файла начата");
-            if (fileService.getFileByName(filename) == null) {
-                log.log(Level.INFO, "Файл новый, загружаем.");
-                return new ResponseEntity<>(fileService.upload(filename, file), HttpStatus.OK);
-            } else {
-                log.log(Level.INFO, "Найден файл с аналогичным именем, обнволяем");
-                return new ResponseEntity<>(fileService.fileUpdateByName(filename, file), HttpStatus.OK);
-            }
-        } catch (IllegalArgumentException argumentException) {
-            log.log(Level.INFO, argumentException.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (IOException ioException) {
-            log.log(Level.INFO, ioException.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) throws IllegalArgumentException, IOException {
+        log.log(Level.INFO, "Загрузка файла начата");
+        if (fileService.getFileByName(filename) == null) {
+            log.log(Level.INFO, "Файл новый, загружаем.");
+            return new ResponseEntity<>(fileService.upload(filename, file), HttpStatus.OK);
+        } else {
+            log.log(Level.INFO, "Найден файл с аналогичным именем, обнволяем");
+            return new ResponseEntity<>(fileService.fileUpdateByName(filename, file), HttpStatus.OK);
         }
     }
 
@@ -60,17 +52,9 @@ public class FileController {
      * @return
      */
     @DeleteMapping
-    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) {
-        try {
-            log.log(Level.INFO, "Удаление файла: " + fileName);
-            fileService.deleteFile(fileName);
-        } catch (FileNotFoundException notFoundException) {
-            log.log(Level.INFO, notFoundException.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (IOException ioException) {
-            log.log(Level.INFO, ioException.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) throws IOException{
+        log.log(Level.INFO, "Удаление файла: " + fileName);
+        fileService.deleteFile(fileName);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -81,18 +65,12 @@ public class FileController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName) {
-        try {
-            log.log(Level.INFO, "Скачиваем файл: " + fileName);
-            Resource resource = fileService.download(fileName);
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
-                    .body(resource);
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (IllegalArgumentException argumentException) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName) throws IllegalArgumentException, IOException {
+        log.log(Level.INFO, "Скачиваем файл: " + fileName);
+        Resource resource = fileService.download(fileName);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
+                .body(resource);
     }
 
     /**
@@ -103,16 +81,8 @@ public class FileController {
      * @return
      */
     @PutMapping
-    public ResponseEntity<File> fileNameUpdate(@RequestParam("filename") String fileName, @RequestBody String name) {
-        try {
-            log.log(Level.INFO, "Изменяем имя для файла: " + fileName);
-            return new ResponseEntity<>(fileService.fileNameUpdate(fileName, name), HttpStatus.OK);
-        } catch (IOException ioException) {
-            log.log(Level.INFO, ioException.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (IllegalArgumentException argumentException) {
-            log.log(Level.INFO, argumentException.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<File> fileNameUpdate(@RequestParam("filename") String fileName, @RequestBody String name) throws IllegalArgumentException, IOException {
+        log.log(Level.INFO, "Изменяем имя для файла: " + fileName);
+        return new ResponseEntity<>(fileService.fileNameUpdate(fileName, name), HttpStatus.OK);
     }
 }

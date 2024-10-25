@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;

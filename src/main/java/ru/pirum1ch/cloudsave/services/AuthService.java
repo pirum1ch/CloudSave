@@ -1,8 +1,8 @@
 package ru.pirum1ch.cloudsave.services;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +28,7 @@ public class AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
         String token = jwtService.generateToken(user);
+//        jwtService.storeToken(token, request.getLogin());
         return new TokenAuthResponce(token);
     }
 

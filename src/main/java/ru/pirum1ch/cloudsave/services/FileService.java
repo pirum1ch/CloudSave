@@ -38,7 +38,7 @@ public class FileService {
     public List<FileDto> getListOfAllFiles(int limit) throws PersistenceException {
         log.log(Level.INFO, "Проверяем аргументы на валидность");
         if (limit <= 0) {
-            throw new NumberFormatException("В качестве лимита передан 0 или отрицательное число. Введите полоижительно целое число.");
+            throw new NumberFormatException("В качестве лимита передан 0 или отрицательное число. Введите положительно целое число.");
         }
 
         List<File> list = fileRepo.findAll();

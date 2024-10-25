@@ -25,16 +25,8 @@ public class ListController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FileDto>> getAllFiles (@RequestParam("limit") int limit){
-        try {
+    public ResponseEntity<List<FileDto>> getAllFiles (@RequestParam("limit") int limit) throws RuntimeException{
             log.log(Level.INFO, "Поиск доступных файлов. Количество не более: " + limit);
             return new ResponseEntity<>(fileService.getListOfAllFiles(limit), HttpStatus.OK);
-        }catch (NumberFormatException numberFormatException){
-            log.log(Level.INFO, numberFormatException.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (RuntimeException runtimeException){
-            log.log(Level.INFO, runtimeException.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 }

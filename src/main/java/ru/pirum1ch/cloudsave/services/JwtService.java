@@ -1,23 +1,27 @@
 package ru.pirum1ch.cloudsave.services;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.pirum1ch.cloudsave.models.Token;
 import ru.pirum1ch.cloudsave.models.User;
+import ru.pirum1ch.cloudsave.repositories.TokenRepo;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
 public class JwtService {
+
+    private final TokenRepo tokenRepo;
 
     @Value("${token.signing.key}")
     private String jwtSigningKey;
@@ -26,6 +30,10 @@ public class JwtService {
     @Value("${token.time.to.live}")
     private int tokenTimeToLive = 600000;
 
+    public JwtService(TokenRepo tokenRepo) {
+        this.tokenRepo = tokenRepo;
+    }
+
 
     /**
      * Извлечение имени пользователя из токена
@@ -33,7 +41,8 @@ public class JwtService {
      * @param token токен
      * @return имя пользователя
      */
-    public String extractUserName(String token) {
+    public String extractUserName(String token)
+    {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -89,7 +98,6 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-//                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
                 .setExpiration(new Date(System.currentTimeMillis() + tokenTimeToLive))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
     }
@@ -121,8 +129,14 @@ public class JwtService {
      * @return данные
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+        var signingKey = getSigningKey();
+        var claims = Jwts.parser()
+                .setSigningKey(signingKey).build()
+                .parseClaimsJws(token)
                 .getBody();
+        return claims;
+//        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+//                .getBody();
     }
 
     /**
@@ -134,4 +148,21 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSigningKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public Token storeToken (String token, String login){
+        Token tokenEntity = Token.builder()
+                .token(token)
+                .date(new Date())
+                .user(User.builder()
+                        .email(login)
+                        .build()).build();
+        tokenRepo.save(tokenEntity);
+        return tokenEntity;
+    }
+
+//    public void setTokenInactive (String jwt){
+//        Optional<> token = tokenRepo.findAllByToken(jwt);
+////        token.setActive(false);
+////        tokenRepo.save(token);
+//    }
 }
