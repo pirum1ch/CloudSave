@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import ru.pirum1ch.cloudsave.dto.requests.LoginRequest;
 import ru.pirum1ch.cloudsave.dto.requests.SignRequest;
 import ru.pirum1ch.cloudsave.dto.responces.TokenAuthResponce;
+import ru.pirum1ch.cloudsave.models.Token;
 import ru.pirum1ch.cloudsave.models.User;
 
 @Service
@@ -25,10 +26,17 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public TokenAuthResponce login(LoginRequest request) throws BadCredentialsException {
+        String token;
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
-        String token = jwtService.generateToken(user);
-//        jwtService.storeToken(token, request.getLogin());
+//        Token tokenEntity = jwtService.getActualToken(request.getLogin());
+        token = jwtService.getActualToken(request.getLogin());
+
+        if (token == null) {
+            token = jwtService.generateToken(user);
+            jwtService.storeToken(token, request.getLogin());
+        }
         return new TokenAuthResponce(token);
     }
 
@@ -42,7 +50,8 @@ public class AuthService {
         return new TokenAuthResponce(token);
     }
 
-//    public void logout(LoginRequest request){
-//        DefaultToken Services
-//    }
+    public TokenAuthResponce logout(LoginRequest request){
+        String token = jwtService.setTokenDead(request.getLogin());
+        return new TokenAuthResponce(token);
+    }
 }

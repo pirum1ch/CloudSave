@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.pirum1ch.cloudsave.models.Token;
 import ru.pirum1ch.cloudsave.models.User;
 import ru.pirum1ch.cloudsave.repositories.TokenRepo;
+import ru.pirum1ch.cloudsave.repositories.UserRepo;
 
 import java.security.Key;
 import java.util.Date;
@@ -22,6 +23,11 @@ import java.util.function.Function;
 public class JwtService {
 
     private final TokenRepo tokenRepo;
+    private final UserRepo userRepo;
+    public JwtService(TokenRepo tokenRepo, UserRepo userRepo) {
+        this.tokenRepo = tokenRepo;
+        this.userRepo = userRepo;
+    }
 
     @Value("${token.signing.key}")
     private String jwtSigningKey;
@@ -29,10 +35,6 @@ public class JwtService {
     //В данной конфигурации токен живет 10 минут
     @Value("${token.time.to.live}")
     private int tokenTimeToLive = 600000;
-
-    public JwtService(TokenRepo tokenRepo) {
-        this.tokenRepo = tokenRepo;
-    }
 
 
     /**
@@ -129,14 +131,12 @@ public class JwtService {
      * @return данные
      */
     private Claims extractAllClaims(String token) {
-        var signingKey = getSigningKey();
-        var claims = Jwts.parser()
-                .setSigningKey(signingKey).build()
+        Claims claims = Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claims;
-//        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
-//                .getBody();
     }
 
     /**
@@ -153,9 +153,9 @@ public class JwtService {
         Token tokenEntity = Token.builder()
                 .token(token)
                 .date(new Date())
-                .user(User.builder()
-                        .email(login)
-                        .build()).build();
+                .login(userRepo.findByEmail(login).getEmail())
+                .isActive(true)
+                .build();
         tokenRepo.save(tokenEntity);
         return tokenEntity;
     }
@@ -165,4 +165,19 @@ public class JwtService {
 ////        token.setActive(false);
 ////        tokenRepo.save(token);
 //    }
+
+    public boolean isTokenDead (String token){
+        return tokenRepo.getTokenStatus(token);
+    }
+
+    public String setTokenDead (String token){
+        Token tokenEntity = tokenRepo.getToken(token);
+        tokenEntity.setActive(false);
+        tokenRepo.save(tokenEntity);
+        return tokenEntity.getToken();
+    }
+
+    public String getActualToken (String login){
+        return tokenRepo.getActualToken(login);
+    }
 }

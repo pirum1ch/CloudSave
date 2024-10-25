@@ -12,7 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.pirum1ch.cloudsave.dto.requests.LoginRequest;
 import ru.pirum1ch.cloudsave.dto.requests.SignRequest;
 import ru.pirum1ch.cloudsave.dto.responces.TokenAuthResponce;
+import ru.pirum1ch.cloudsave.models.Token;
 import ru.pirum1ch.cloudsave.services.AuthService;
+import ru.pirum1ch.cloudsave.services.JwtService;
 
 @RestController
 @RequestMapping("/")
@@ -32,8 +34,9 @@ public class AuthController {
         return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 
-    public void logout() {
-
+    @PostMapping("login")
+    public ResponseEntity<TokenAuthResponce> logout(@RequestParam("logout") String logout, @RequestBody @Valid LoginRequest request) {
+        return new ResponseEntity<> (authService.logout(request), HttpStatus.OK);
     }
 
 //    @PostMapping("sign-up")
