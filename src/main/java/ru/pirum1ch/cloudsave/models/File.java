@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import lombok.*;
-
 import java.util.Date;
 import java.util.Objects;
 
@@ -37,16 +36,17 @@ public class File {
     @Column(name = "extention")
     private String extention;
 
-    @Column(name = "uploadDate")
+    @Column(name = "upload_date")
     private Date uploadDate;
 
 
     @Override
     public String toString() {
-        return "File name= '" + name + '\'' +
-                ", size=" + size +
-                ", extention='" + extention + '\'' +
-                ", dateOfCreation=" + uploadDate +
+        return "File : \n" +
+                "name= '" + name + '\'' + ",\n" +
+                " size=" + size + ",\n" +
+                " extention='" + extention + '\'' + ",\n" +
+                " dateOfCreation=" + uploadDate +
                 ';';
     }
 
