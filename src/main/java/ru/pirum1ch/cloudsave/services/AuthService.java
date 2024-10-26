@@ -31,10 +31,27 @@ public class AuthService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
 //        Token tokenEntity = jwtService.getActualToken(request.getLogin());
+        //Получаем токен последний актуальный токен (в теории он может быть только один)
         token = jwtService.getActualToken(request.getLogin());
 
+        //Если токена нет
         if (token == null) {
+            //выпускаем новый
             token = jwtService.generateToken(user);
+            //И сохраняем его в БД
+            jwtService.storeToken(token, request.getLogin());
+        }
+
+        //Проверяем не закончен ли его срок действия
+        try{
+            jwtService.isTokenExpired(token);
+            //Если ловим ошибку по сроку действия
+        }catch (ExpiredJwtException expiredJwtException){
+            //Помечаем его просроченным
+            jwtService.setTokenDead(token);
+            //Выпускаем новый токен
+            token = jwtService.generateToken(user);
+            //Сохраняем его в БД как действующий
             jwtService.storeToken(token, request.getLogin());
         }
         return new TokenAuthResponce(token);

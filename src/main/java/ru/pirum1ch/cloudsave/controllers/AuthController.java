@@ -34,9 +34,10 @@ public class AuthController {
         return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 
-    @PostMapping("login")
-    public ResponseEntity<TokenAuthResponce> logout(@RequestParam("logout") String logout, @RequestBody @Valid LoginRequest request) {
-        return new ResponseEntity<> (authService.logout(request), HttpStatus.OK);
+    @PostMapping("logout")
+    public ResponseEntity<TokenAuthResponce> logout() {
+//        return new ResponseEntity<> (authService.logout(request), HttpStatus.OK);
+    return null;
     }
 
 //    @PostMapping("sign-up")

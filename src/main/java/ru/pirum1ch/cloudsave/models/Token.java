@@ -1,8 +1,12 @@
 package ru.pirum1ch.cloudsave.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.*;
-
 import java.util.Date;
 import java.util.Objects;
 
@@ -17,6 +21,7 @@ public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "login")
@@ -30,26 +35,26 @@ public class Token {
 
     @Column(name = "create_date")
     private Date date;
+//
+//    @Override
+//    public String toString() {
+//        return "Token {" +
+//                "id=" + id + ", \n" +
+//                " login='" + login + '\'' + ", \n" +
+//                " token='" + token + '\'' + ", \n" +
+//                " date=" + date +
+//                '}';
+//    }
 
-    @Override
-    public String toString() {
-        return "Token {" +
-                "id=" + id + ", \n" +
-                " login='" + login + '\'' + ", \n" +
-                " token='" + token + '\'' + ", \n" +
-                " date=" + date +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Token token1)) return false;
-        return Objects.equals(login, token1.login) && Objects.equals(token, token1.token) && Objects.equals(date, token1.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(login, token, date);
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (!(o instanceof Token token1)) return false;
+//        return Objects.equals(login, token1.login) && Objects.equals(token, token1.token) && Objects.equals(date, token1.date);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(login, token, date);
+//    }
 }

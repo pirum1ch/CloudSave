@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,6 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ru.pirum1ch.cloudsave.handlers.CustomAuthenticationExceptionHandler;
+import ru.pirum1ch.cloudsave.handlers.CustomLogoutHandler;
 import ru.pirum1ch.cloudsave.services.CustomUserDetailService;
 
 import java.util.List;
@@ -29,13 +32,17 @@ import java.util.List;
 public class SecurityConfiguration {
     private final CustomUserDetailService customUserDetailService;
     private final JWTAuthFilter jwtAuthFilter;
+    private final CustomLogoutHandler customLogoutHandler;
 
     @Value("${password.encoder.strength}")
     private int strength;
 
-    public SecurityConfiguration(CustomUserDetailService customUserDetailService, JWTAuthFilter jwtAuthFilter) {
+    public SecurityConfiguration(CustomUserDetailService customUserDetailService,
+                                 JWTAuthFilter jwtAuthFilter,
+                                 CustomLogoutHandler customLogoutHandler) {
         this.customUserDetailService = customUserDetailService;
         this.jwtAuthFilter = jwtAuthFilter;
+        this.customLogoutHandler = customLogoutHandler;
     }
 
     @Bean
@@ -45,13 +52,19 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> corsConfigurationSource())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("login", "sign-up", "logout").permitAll()
+                        .requestMatchers("/login", "/sign-up", "/logout").permitAll()
                         .requestMatchers("/**").authenticated()
                 )
                 .authenticationProvider(authProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
+                        .authenticationEntryPoint(new CustomAuthenticationExceptionHandler()))
+                .logout(logout -> logout
+                        .logoutSuccessUrl("login")
+                        .addLogoutHandler(customLogoutHandler)
+                        .invalidateHttpSession(true)
+                                .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                        )
                 .build();
     }
 
@@ -85,13 +98,5 @@ public class SecurityConfiguration {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(strength);
     }
-
-//    @Bean
-//    public DefaultTokenServices tokenServices() {
-//        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-//        defaultTokenServices.setTokenStore(tokenStore());
-//        defaultTokenServices.setSupportRefreshToken(true);
-//        return defaultTokenServices;
-//    }
 
 }

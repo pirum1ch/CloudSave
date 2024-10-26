@@ -1,6 +1,5 @@
 package ru.pirum1ch.cloudsave.handlers;
 
-
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.http.HttpStatus;
@@ -53,9 +52,9 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка ввода целочисленного значения");
     }
 
-    @ExceptionHandler()
-    public ResponseEntity runtimeException(RuntimeException runtimeException) {
-        log.log(Level.ERROR, runtimeException.getLocalizedMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка выполенения");
-    }
+//    @ExceptionHandler()
+//    public ResponseEntity runtimeException(RuntimeException runtimeException) {
+//        log.log(Level.ERROR, runtimeException.getLocalizedMessage());
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка выполенения");
+//    }
 }

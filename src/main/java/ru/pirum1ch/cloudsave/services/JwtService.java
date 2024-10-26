@@ -13,10 +13,7 @@ import ru.pirum1ch.cloudsave.repositories.TokenRepo;
 import ru.pirum1ch.cloudsave.repositories.UserRepo;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -110,7 +107,7 @@ public class JwtService {
      * @param token токен
      * @return true, если токен просрочен
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -159,12 +156,6 @@ public class JwtService {
         tokenRepo.save(tokenEntity);
         return tokenEntity;
     }
-
-//    public void setTokenInactive (String jwt){
-//        Optional<> token = tokenRepo.findAllByToken(jwt);
-////        token.setActive(false);
-////        tokenRepo.save(token);
-//    }
 
     public boolean isTokenDead (String token){
         return tokenRepo.getTokenStatus(token);
