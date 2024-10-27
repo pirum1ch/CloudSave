@@ -1,8 +1,13 @@
 package ru.pirum1ch.cloudsave.handlers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
+import org.springframework.boot.jackson.JsonObjectSerializer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 @Log4j2
@@ -19,7 +26,11 @@ public class ExceptionHandlerAdvice {
     @ExceptionHandler()
     public ResponseEntity badCredentialException(BadCredentialsException credentialsException) {
         log.log(Level.ERROR, credentialsException.getLocalizedMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка ввода логина-пароля");
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ошибка ввода логина-пароля");
+        Map<String, String> data = new HashMap<>();
+        data.put("key1", "value1");
+        data.put("key2", );
+        return new ResponseEntity(data, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler()
