@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.controllers;
 
+import io.minio.errors.MinioException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.core.io.Resource;
@@ -9,18 +10,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.services.FileService;
+import ru.pirum1ch.cloudsave.services.MinioFileService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @Log4j2
 @RequestMapping("/file")
 public class FileController {
 
-    private final FileService fileService;
+    private final MinioFileService fileService;
 
-    public FileController(FileService fileService) {
+    public FileController(MinioFileService fileService) {
         this.fileService = fileService;
     }
 
@@ -34,7 +38,7 @@ public class FileController {
      */
 
     @PostMapping
-    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) throws IllegalArgumentException, IOException {
+    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
         log.log(Level.INFO, "Загрузка файла начата");
         if (fileService.getFileByName(filename) == null) {
             log.log(Level.INFO, "Файл новый, загружаем.");

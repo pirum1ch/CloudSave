@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.services;
 
+import io.minio.errors.MinioException;
 import jakarta.persistence.PersistenceException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
@@ -11,22 +12,25 @@ import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.repositories.FileRepo;
 import ru.pirum1ch.cloudsave.utils.FileManager;
+import ru.pirum1ch.cloudsave.utils.MinioFileManager;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 @Service
 @Log4j2
-public class FileService {
+public class MinioFileService {
 
     private final FileRepo fileRepo;
-    private final FileManager fileManager;
+    private final MinioFileManager fileManager;
 
-    public FileService(FileRepo fileRepo, FileManager fileManager) {
+    public MinioFileService(FileRepo fileRepo, MinioFileManager fileManager) {
         this.fileRepo = fileRepo;
         this.fileManager = fileManager;
     }
@@ -60,8 +64,8 @@ public class FileService {
         return listdto;
     }
 
-    @Transactional(rollbackFor = {IOException.class})
-    public File upload(String fileName, MultipartFile file) throws IOException {
+    @Transactional(rollbackFor = {IOException.class, MinioException.class, NoSuchAlgorithmException.class, InvalidKeyException.class})
+    public File upload(String fileName, MultipartFile file) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
         log.log(Level.INFO, "Проверяем что входящие аргументы не пустые");
         if (fileName.isEmpty() || file.isEmpty()) {
             throw new IllegalArgumentException("Переданные на вход значения пусты!");
@@ -79,7 +83,8 @@ public class FileService {
         log.log(Level.INFO, "Создали новый объект файла: \n" + uploadedFile);
         fileRepo.save(uploadedFile);
         log.log(Level.INFO, "Сохранили данные сущности в БД");
-        fileManager.fileUpload(file.getBytes(), key);
+//        fileManager.fileUpload(file.getBytes(), key);
+        fileManager.minioUpload(file, key);
         return uploadedFile;
     }
 

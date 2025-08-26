@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoginRequest {
 
-//    String email;
     String login;
     String password;
 }
