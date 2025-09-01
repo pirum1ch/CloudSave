@@ -22,4 +22,8 @@ public class CustomUserDetailService implements UserDetailsService {
         if (user!=null) return user;
         else throw new UsernameNotFoundException("No such User");
     }
+
+    public UserDetails saveUser(User user) throws UsernameNotFoundException {
+        return userRepo.save(user);
+    }
 }

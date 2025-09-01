@@ -1,8 +1,7 @@
 package ru.pirum1ch.cloudsave.utils;
 
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
+import io.minio.*;
+import io.minio.errors.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.configurations.MinioConfig;
+import ru.pirum1ch.cloudsave.models.File;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,33 +36,33 @@ public class MinioFileManager {
     }
 
     //Директория для загрузки.
-    private String loadDiretory = MinioConfig.UPLOAD_BUCKET_NAME;
+    private String loadDiretory = MinioConfig.getUploadBucketName();
 
-    /**
-     * Загрузка файла. Для каждого файла генерится отдельный уникальный ключ, под которым он сохранятеся в облаке.
-     * Данные о загруденном файле созранятеся в БД.
-     *
-     * @param resource
-     * @param key
-     * @throws IOException
-     * @throws InvalidPathException
-     */
-    public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
-        Path path = Paths.get(loadDiretory, key).toAbsolutePath();
-        log.log(Level.INFO, "Адрес сохранения файла: " + path);
-
-        Path file = Files.createFile(path);
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(file.toString());
-            fileOutputStream.write(resource);
-            log.log(Level.INFO, "Файл загружен успешно!");
-        } finally {
-            log.log(Level.INFO, "Закрываем поток записи файла.");
-            assert fileOutputStream != null;
-            fileOutputStream.close();
-        }
-    }
+//    /**
+//     * Загрузка файла. Для каждого файла генерится отдельный уникальный ключ, под которым он сохранятеся в облаке.
+//     * Данные о загруденном файле созранятеся в БД.
+//     *
+//     * @param resource
+//     * @param key
+//     * @throws IOException
+//     * @throws InvalidPathException
+//     */
+//    public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
+//        Path path = Paths.get(loadDiretory, key).toAbsolutePath();
+//        log.log(Level.INFO, "Адрес сохранения файла: " + path);
+//
+//        Path file = Files.createFile(path);
+//        FileOutputStream fileOutputStream = null;
+//        try {
+//            fileOutputStream = new FileOutputStream(file.toString());
+//            fileOutputStream.write(resource);
+//            log.log(Level.INFO, "Файл загружен успешно!");
+//        } finally {
+//            log.log(Level.INFO, "Закрываем поток записи файла.");
+//            assert fileOutputStream != null;
+//            fileOutputStream.close();
+//        }
+//    }
 
 
     public void minioUpload(MultipartFile file, String key) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
@@ -83,33 +83,51 @@ public class MinioFileManager {
      * @return
      * @throws IOException
      */
-    public Resource download(String key) throws IOException {
-        Path path = Paths.get(loadDiretory + key);
-        log.log(Level.INFO, "Адрес скачивания фалйа: " + path);
-        Resource resource = new UrlResource(path.toUri());
-        if (resource.exists() || resource.isReadable()) {
-            log.log(Level.INFO, "Файл скачан успешно!");
-            return resource;
-        } else {
-            log.log(Level.ERROR, "Ошибка скачивания!");
-            throw new IOException();
+    public void download(String key, String fileName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        if (key != null) {
+            minioClient.downloadObject(
+                    DownloadObjectArgs.builder()
+                            .bucket(loadDiretory)
+                            .object(key)
+                            .filename("/Users/dmitriy.pirumov/Downloads/" + fileName)
+                            .build()
+            );
         }
+//
+//
+//
+//
+//        Path path = Paths.get(loadDiretory +"/"+ key);
+//        log.log(Level.INFO, "Адрес скачивания фалйа: " + path);
+//        Resource resource = new UrlResource(path.toUri());
+//        if (resource.exists() || resource.isReadable()) {
+//            log.log(Level.INFO, "Файл скачан успешно!");
+//            return resource;
+//        } else {
+//            log.log(Level.ERROR, "Ошибка скачивания!");
+//            throw new IOException();
+//        }
     }
 
     /**
      * Удаление файла
      *
-     * @param key
-     * @throws IOException
+     * @param file
+     * @throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
      */
-    public void deleteFile(String key) throws IOException {
-        Path path = Paths.get(loadDiretory + key);
+    public void deleteFile(File file) throws IOException, ServerException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, ErrorResponseException {
+        String key = file.getKey();
+        Path path = Paths.get(loadDiretory + " Key: " + key);
         log.log(Level.INFO, "Директория для удаления файла: " + path);
 
-        Resource resource = new UrlResource(path.toUri());
-        if (resource.exists() || resource.isFile()) {
-            Files.delete(path);
-            log.log(Level.INFO, "Удаляем файл из директории");
+        //Проверяем что файл существует
+        if (minioClient.bucketExists(BucketExistsArgs.builder().bucket(loadDiretory).build())) {
+            try {
+                minioClient.statObject(StatObjectArgs.builder().bucket(loadDiretory).object(key).build());
+            } catch (ErrorResponseException errorResponseException) {
+                log.log(Level.ERROR, "Файл " + key + " не найден:\n" + errorResponseException.getLocalizedMessage());
+            }
+            minioClient.removeObject(RemoveObjectArgs.builder().bucket(loadDiretory).object(key).build());
         }
     }
 

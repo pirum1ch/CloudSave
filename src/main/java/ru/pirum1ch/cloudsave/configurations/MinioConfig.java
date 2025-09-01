@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MinioConfig {
 
-    @Value("${minio.bucket.name}")
     public static String UPLOAD_BUCKET_NAME;
 //    public static final String UPLOAD_BUCKET_NAME = "test-bucket";
 
@@ -27,6 +26,15 @@ public class MinioConfig {
                 .endpoint(minioUrl)
                 .credentials(minioAccessName, minioAccessSecret)
                 .build();
+    }
+
+    public static String getUploadBucketName() {
+        return UPLOAD_BUCKET_NAME;
+    }
+
+    @Value("${minio.bucket.name}")
+    public void setUploadBucketName(String uploadBucketName) {
+        UPLOAD_BUCKET_NAME = uploadBucketName;
     }
 
 }

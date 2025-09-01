@@ -1,6 +1,6 @@
 package ru.pirum1ch.cloudsave.controllers;
 
-import io.minio.errors.MinioException;
+import io.minio.errors.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.core.io.Resource;
@@ -39,14 +39,8 @@ public class FileController {
 
     @PostMapping
     public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
-        log.log(Level.INFO, "Загрузка файла начата");
-        if (fileService.getFileByName(filename) == null) {
-            log.log(Level.INFO, "Файл новый, загружаем.");
-            return new ResponseEntity<>(fileService.upload(filename, file), HttpStatus.OK);
-        } else {
-            log.log(Level.INFO, "Найден файл с аналогичным именем, обнволяем");
-            return new ResponseEntity<>(fileService.fileUpdateByName(filename, file), HttpStatus.OK);
-        }
+        log.log(Level.INFO, "Загружаем новый файл: " + filename);
+        return new ResponseEntity<>(fileService.upload(filename, file), HttpStatus.OK);
     }
 
     /**
@@ -56,7 +50,7 @@ public class FileController {
      * @return
      */
     @DeleteMapping
-    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) throws IOException{
+    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         log.log(Level.INFO, "Удаление файла: " + fileName);
         fileService.deleteFile(fileName);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -69,12 +63,15 @@ public class FileController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName) throws IllegalArgumentException, IOException {
+    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName)
+            throws IllegalArgumentException, IOException, ServerException, InsufficientDataException,
+            ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException
+    {
+        //TODO if file exists
         log.log(Level.INFO, "Скачиваем файл: " + fileName);
-        Resource resource = fileService.download(fileName);
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
-                .body(resource);
+        fileService.download(fileName);
+        return ResponseEntity.ok().build();
     }
 
     /**
