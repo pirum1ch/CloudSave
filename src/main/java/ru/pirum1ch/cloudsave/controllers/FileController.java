@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.controllers;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.minio.errors.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
@@ -9,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.models.File;
-import ru.pirum1ch.cloudsave.services.FileService;
 import ru.pirum1ch.cloudsave.services.MinioFileService;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -50,10 +48,10 @@ public class FileController {
      * @return
      */
     @DeleteMapping
-    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ResponseEntity<?> delete(@RequestParam("filename") String fileName)  throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         log.log(Level.INFO, "Удаление файла: " + fileName);
         fileService.deleteFile(fileName);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Файл удален", HttpStatus.OK);
     }
 
     /**
@@ -63,7 +61,7 @@ public class FileController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName)
+    public ResponseEntity<?> downloadFile(@RequestParam("filename") String fileName)
             throws IllegalArgumentException, IOException, ServerException, InsufficientDataException,
             ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
             XmlParserException, InternalException
@@ -71,7 +69,7 @@ public class FileController {
         //TODO if file exists
         log.log(Level.INFO, "Скачиваем файл: " + fileName);
         fileService.download(fileName);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>("Файл " + fileName + " скачан", HttpStatus.OK);
     }
 
     /**

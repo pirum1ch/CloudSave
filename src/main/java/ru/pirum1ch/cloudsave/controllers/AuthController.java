@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.controllers;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;

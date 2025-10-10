@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.configurations.MinioConfig;
 import ru.pirum1ch.cloudsave.models.File;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,36 +36,18 @@ public class MinioFileManager {
         this.minioClient = minioClient;
     }
 
-    //Директория для загрузки.
     private String loadDiretory = MinioConfig.getUploadBucketName();
 
-//    /**
-//     * Загрузка файла. Для каждого файла генерится отдельный уникальный ключ, под которым он сохранятеся в облаке.
-//     * Данные о загруденном файле созранятеся в БД.
-//     *
-//     * @param resource
-//     * @param key
-//     * @throws IOException
-//     * @throws InvalidPathException
-//     */
-//    public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
-//        Path path = Paths.get(loadDiretory, key).toAbsolutePath();
-//        log.log(Level.INFO, "Адрес сохранения файла: " + path);
-//
-//        Path file = Files.createFile(path);
-//        FileOutputStream fileOutputStream = null;
-//        try {
-//            fileOutputStream = new FileOutputStream(file.toString());
-//            fileOutputStream.write(resource);
-//            log.log(Level.INFO, "Файл загружен успешно!");
-//        } finally {
-//            log.log(Level.INFO, "Закрываем поток записи файла.");
-//            assert fileOutputStream != null;
-//            fileOutputStream.close();
-//        }
-//    }
-
-
+    /**
+     * Загрузка файла в хранилище
+     *
+     * @param file
+     * @param key
+     * @throws IOException
+     * @throws MinioException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
     public void minioUpload(MultipartFile file, String key) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
         //TODO Return a name of bucket
         log.log(Level.INFO, "Сохраняем файл в minio: " + loadDiretory);
@@ -74,7 +57,9 @@ public class MinioFileManager {
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
                 .build());
+        log.log(Level.INFO, "Файл сохранен успешно");
     }
+
 
     /**
      * Скачиванеи файла. Тут все элеметнтарно
@@ -92,21 +77,8 @@ public class MinioFileManager {
                             .filename("/Users/dmitriy.pirumov/Downloads/" + fileName)
                             .build()
             );
+            log.log(Level.INFO, "Файл успешно скачан в директорию: " + loadDiretory);
         }
-//
-//
-//
-//
-//        Path path = Paths.get(loadDiretory +"/"+ key);
-//        log.log(Level.INFO, "Адрес скачивания фалйа: " + path);
-//        Resource resource = new UrlResource(path.toUri());
-//        if (resource.exists() || resource.isReadable()) {
-//            log.log(Level.INFO, "Файл скачан успешно!");
-//            return resource;
-//        } else {
-//            log.log(Level.ERROR, "Ошибка скачивания!");
-//            throw new IOException();
-//        }
     }
 
     /**
@@ -123,11 +95,15 @@ public class MinioFileManager {
         //Проверяем что файл существует
         if (minioClient.bucketExists(BucketExistsArgs.builder().bucket(loadDiretory).build())) {
             try {
-                minioClient.statObject(StatObjectArgs.builder().bucket(loadDiretory).object(key).build());
-            } catch (ErrorResponseException errorResponseException) {
-                log.log(Level.ERROR, "Файл " + key + " не найден:\n" + errorResponseException.getLocalizedMessage());
+                if (minioClient.statObject(StatObjectArgs.builder().bucket(loadDiretory).object(key).build()) != null){
+                    minioClient.removeObject(RemoveObjectArgs.builder().bucket(loadDiretory).object(key).build());
+                }
+            } catch (FileNotFoundException fileNotFoundException) {
+                log.log(Level.INFO, "Файл " + key + " не найден:\n" + fileNotFoundException.getLocalizedMessage());
             }
-            minioClient.removeObject(RemoveObjectArgs.builder().bucket(loadDiretory).object(key).build());
+
+        }else {
+            throw new IOException();
         }
     }
 
@@ -138,6 +114,8 @@ public class MinioFileManager {
      * @return
      */
     public String generateKey(String name) {
-        return DigestUtils.md5DigestAsHex((name + LocalDateTime.now()).getBytes());
+        String key = DigestUtils.md5DigestAsHex((name + LocalDateTime.now()).getBytes());
+        log.log(Level.INFO, "Создали новый ключ для файла " + key);
+        return key;
     }
 }
