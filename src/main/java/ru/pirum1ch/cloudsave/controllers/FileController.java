@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.services.MinioFileService;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -64,9 +65,8 @@ public class FileController {
     @DeleteMapping
     public ResponseEntity<?> delete(@RequestParam("filename") String fileName)
             throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
-            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException
-    {
-        log.log(Level.INFO, "Удаление файла: " + fileName);
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        log.info("Удаление файла: " + fileName);
         fileService.deleteFile(fileName);
         return new ResponseEntity<>("Файл удален", HttpStatus.OK);
     }
@@ -81,8 +81,7 @@ public class FileController {
     public ResponseEntity<?> downloadFile(@RequestParam("filename") String fileName)
             throws IllegalArgumentException, IOException, ServerException, InsufficientDataException,
             ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
-            XmlParserException, InternalException
-    {
+            XmlParserException, InternalException {
         //TODO if file exists
         log.debug("Скачиваем файл: " + fileName);
         fileService.download(fileName);
@@ -98,7 +97,7 @@ public class FileController {
      */
     @PutMapping
     public ResponseEntity<File> fileNameUpdate(@RequestParam("filename") String fileName, @RequestBody String name) throws IllegalArgumentException, IOException {
-        log.log(Level.INFO, "Изменяем имя для файла: " + fileName);
+        log.info("Изменяем имя для файла: " + fileName);
         return new ResponseEntity<>(fileService.fileNameUpdate(fileName, name), HttpStatus.OK);
     }
 }

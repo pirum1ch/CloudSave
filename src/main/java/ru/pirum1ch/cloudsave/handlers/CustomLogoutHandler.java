@@ -29,7 +29,7 @@ public class CustomLogoutHandler implements LogoutHandler {
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) {
-        log.log(Level.INFO, "Выполняем логаут");
+        log.info("Выполняем логаут");
         String authHeader = request.getHeader(HEADER_NAME);
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
             return;
@@ -39,10 +39,10 @@ public class CustomLogoutHandler implements LogoutHandler {
         String token = authHeader.substring(BEARER_PREFIX.length());
 
         Token storedToken = tokenRepo.getToken(token);
-        if (storedToken != null){
+        if (storedToken != null) {
             storedToken.setActive(false);
             tokenRepo.save(storedToken);
-        }else {
+        } else {
             throw new JwtException("Нет такого токена в БД: " + token);
         }
     }

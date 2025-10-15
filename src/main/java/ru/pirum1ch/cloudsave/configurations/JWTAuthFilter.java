@@ -56,8 +56,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         String username = "";
         try {
             username = jwtService.extractUserName(jwt);
-        }catch (ExpiredJwtException expiredJwtException){
-            log.log(Level.INFO, "JWT Token просрочен: {}", expiredJwtException.getLocalizedMessage());
+        } catch (ExpiredJwtException expiredJwtException) {
+            log.info("JWT Token просрочен: {}", expiredJwtException.getLocalizedMessage());
         }
 
         if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {

@@ -10,7 +10,7 @@ import java.awt.print.Pageable;
 import java.util.List;
 
 @Repository
-public interface FileRepo extends JpaRepository<File, Long>{
+public interface FileRepo extends JpaRepository<File, Long> {
 
     @Override
     <S extends File> S save(S entity);

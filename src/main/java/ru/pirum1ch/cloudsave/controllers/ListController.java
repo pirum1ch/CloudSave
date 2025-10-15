@@ -33,7 +33,7 @@ public class ListController {
             @RequestParam(defaultValue = "id") String sort)
             throws RuntimeException
     {
-            log.log(Level.INFO, "Поиск доступных файлов. Количество не более: " + limitOfFiles);
+            log.info( "Поиск доступных файлов. Количество не более: " + limitOfFiles);
         Sort sorting = Sort.by(sort).ascending();
         Pageable pageable = PageRequest.of(page, limitOfFiles, sorting);
         Page<File> filePage = fileService.getListOfAllFiles(pageable);

@@ -31,7 +31,7 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<TokenAuthResponce> login(@RequestBody @Valid LoginRequest request) {
-        log.log(Level.INFO, "Попытка авторизации пользователя " + request.getLogin());
+        log.info( "Попытка авторизации пользователя " + request.getLogin());
         return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 

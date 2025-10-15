@@ -47,7 +47,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.log(Level.INFO, "Конфигурируем SecurityFilterChain");
+        log.info("Конфигурируем SecurityFilterChain");
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> corsConfigurationSource())
@@ -63,8 +63,8 @@ public class SecurityConfiguration {
                         .logoutSuccessUrl("login")
                         .addLogoutHandler(customLogoutHandler)
                         .invalidateHttpSession(true)
-                                .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
-                        )
+                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                )
                 .build();
     }
 

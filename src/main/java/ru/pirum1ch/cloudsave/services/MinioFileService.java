@@ -25,8 +25,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+
 
 @Service
 @Log4j2
@@ -42,7 +41,6 @@ public class MinioFileService {
         this.fileManager = fileManager;
     }
 
-    //TODO add a Pagination
     public Page<File> getListOfAllFiles(Pageable pageable) throws PersistenceException {
         return fileListRepo.findAll(pageable);
     }
@@ -51,7 +49,7 @@ public class MinioFileService {
     public void upload(@NonNull MultipartFile[] multiFile)
             throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
 
-        for (MultipartFile file : multiFile){
+        for (MultipartFile file : multiFile) {
             String fileName = file.getOriginalFilename();
             String key = fileManager.generateKey(fileName);
 
@@ -73,7 +71,7 @@ public class MinioFileService {
             log.debug("Создали новый объект файла: \n" + uploadedFile);
             fileManager.minioUpload(file, key);
             fileRepo.save(uploadedFile);
-            log.info("Файл сохранен успешно");;
+            log.info("Файл сохранен успешно");
         }
     }
 
@@ -86,24 +84,20 @@ public class MinioFileService {
         fileManager.download(key, fileName);
     }
 
-    public File fileNameUpdate(String fileName, String name) throws IllegalArgumentException, IOException {
-        log.log(Level.INFO, "Проверяем аргументы на валидность");
-        if (fileName.isEmpty() || name.isEmpty()) {
-            throw new IllegalArgumentException("Переданные на вход значения пусты!");
-        }
+    public File fileNameUpdate(@NonNull String fileName, @NonNull String name) throws IllegalArgumentException, IOException {
 
         File foundFile = fileRepo.findByName(fileName);
-        log.log(Level.INFO, "Файл для обновления: " + foundFile);
+        log.info("Файл для обновления: " + foundFile);
         if (foundFile == null) {
             throw new FileNotFoundException("Нет такого файла!");
         }
 
         String nameNew = name.substring(13, 20);
-        log.log(Level.INFO, "Получили новое имя файла: " + nameNew);
+        log.info("Получили новое имя файла: " + nameNew);
         foundFile.setName(nameNew);
-        log.log(Level.INFO, "Обновили файл: " + foundFile);
+        log.info("Обновили файл: " + foundFile);
         fileRepo.save(foundFile);
-        log.log(Level.INFO, "");
+        log.info("");
         return foundFile;
     }
 
@@ -116,23 +110,22 @@ public class MinioFileService {
             InvalidKeyException,
             InvalidResponseException,
             XmlParserException,
-            InternalException
-    {
-        log.log(Level.INFO, "Проверяем что входящие аргументы не пусты: " + filename);
+            InternalException {
+        log.info("Проверяем что входящие аргументы не пусты: " + filename);
         if (filename.isEmpty()) {
-            log.log(Level.INFO, "Входящий аргумент пустой! Введите имя файла для удаления.");
+            log.info("Входящий аргумент пустой! Введите имя файла для удаления.");
             throw new IllegalArgumentException();
         }
 
         File file = fileRepo.findByName(filename);
-        if (fileRepo.findByName(filename) == null ) {
-            log.log(Level.INFO, "Файла "+ filename +" не существует! ");
+        if (fileRepo.findByName(filename) == null) {
+            log.info("Файла " + filename + " не существует! ");
             throw new FileNotFoundException();
         }
-        log.log(Level.INFO, "Найден файл для удаления:\n" + file.toString());
+        log.info("Найден файл для удаления:\n" + file.toString());
 
         fileManager.deleteFile(file);
         fileRepo.delete(file);
-        log.log(Level.INFO, "Файл удален.");
+        log.info("Файл удален.");
     }
 }
