@@ -1,6 +1,7 @@
 package ru.pirum1ch.cloudsave.configurations;
 
 import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +22,15 @@ public class MinioConfig {
     private String minioAccessSecret;
 
     @Bean
-    public MinioClient minioClient() {
-        return MinioClient.builder()
-                .endpoint(minioUrl)
-                .credentials(minioAccessName, minioAccessSecret)
-                .build();
+    public MinioClient minioClient() throws MinioException{
+        try {
+            return MinioClient.builder()
+                    .endpoint(minioUrl)
+                    .credentials(minioAccessName, minioAccessSecret)
+                    .build();
+        }catch (Exception exception){
+            throw new MinioException("Ошибка инициализации клиента Minio");
+        }
     }
 
     public static String getUploadBucketName() {

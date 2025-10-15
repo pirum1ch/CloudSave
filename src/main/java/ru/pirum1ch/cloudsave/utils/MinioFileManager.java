@@ -57,9 +57,8 @@ public class MinioFileManager {
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
                 .build());
-        log.log(Level.INFO, "Файл сохранен успешно");
+        log.info("Файл успешно загружен в minio");;
     }
-
 
     /**
      * Скачиванеи файла. Тут все элеметнтарно
@@ -68,17 +67,23 @@ public class MinioFileManager {
      * @return
      * @throws IOException
      */
-    public void download(String key, String fileName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        if (key != null) {
-            minioClient.downloadObject(
-                    DownloadObjectArgs.builder()
-                            .bucket(loadDiretory)
-                            .object(key)
-                            .filename("/Users/dmitriy.pirumov/Downloads/" + fileName)
-                            .build()
-            );
-            log.log(Level.INFO, "Файл успешно скачан в директорию: " + loadDiretory);
+    public void download(String key, String fileName) throws IllegalArgumentException, IOException, ServerException,
+            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException
+    {
+        if (key == null|| fileName == null){
+            throw new IllegalArgumentException();
         }
+
+        minioClient.downloadObject(
+                DownloadObjectArgs.builder()
+                        .bucket(loadDiretory)
+                        .object(key)
+                        .filename("/Users/dmitriy.pirumov/Downloads/" + fileName)
+                        .build()
+        );
+        log.log(Level.INFO, "Файл успешно скачан в директорию: " + loadDiretory);
+
     }
 
     /**
