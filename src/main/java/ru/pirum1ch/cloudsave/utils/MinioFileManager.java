@@ -28,7 +28,7 @@ public class MinioFileManager {
         this.minioClient = minioClient;
     }
 
-    private String loadDiretory = MinioConfig.getUploadBucketName();
+    private final String loadDirectory = MinioConfig.getUploadBucketName();
 
     /**
      * Загрузка файла в хранилище
@@ -42,8 +42,13 @@ public class MinioFileManager {
      */
     public void minioUpload(MultipartFile file, String key) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
         //TODO Return a name of bucket
-        log.info("Сохраняем файл в minio: " + loadDiretory);
-        minioClient.putObject(PutObjectArgs.builder().bucket(loadDiretory).object(key).stream(file.getInputStream(), file.getSize(), -1).contentType(file.getContentType()).build());
+        log.info("Сохраняем файл в minio: " + loadDirectory);
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(loadDirectory)
+                .object(key)
+                .stream(file.getInputStream(), file.getSize(), -1)
+                .contentType(file.getContentType())
+                .build());
         log.info("Файл успешно загружен в minio");
     }
 
@@ -59,8 +64,8 @@ public class MinioFileManager {
             throw new IllegalArgumentException();
         }
 
-        minioClient.downloadObject(DownloadObjectArgs.builder().bucket(loadDiretory).object(key).filename("/Users/dmitriy.pirumov/Downloads/" + fileName).build());
-        log.info("Файл успешно скачан в директорию: " + loadDiretory);
+        minioClient.downloadObject(DownloadObjectArgs.builder().bucket(loadDirectory).object(key).filename("/Users/dmitriy.pirumov/Downloads/" + fileName).build());
+        log.info("Файл успешно скачан в директорию: " + loadDirectory);
 
     }
 
@@ -72,14 +77,14 @@ public class MinioFileManager {
      */
     public void deleteFile(File file) throws IOException, ServerException, InsufficientDataException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, ErrorResponseException {
         String key = file.getKey();
-        Path path = Paths.get(loadDiretory + " Key: " + key);
+        Path path = Paths.get(loadDirectory + " Key: " + key);
         log.info("Директория для удаления файла: " + path);
 
         //Проверяем что файл существует
-        if (minioClient.bucketExists(BucketExistsArgs.builder().bucket(loadDiretory).build())) {
+        if (minioClient.bucketExists(BucketExistsArgs.builder().bucket(loadDirectory).build())) {
             try {
-                if (minioClient.statObject(StatObjectArgs.builder().bucket(loadDiretory).object(key).build()) != null) {
-                    minioClient.removeObject(RemoveObjectArgs.builder().bucket(loadDiretory).object(key).build());
+                if (minioClient.statObject(StatObjectArgs.builder().bucket(loadDirectory).object(key).build()) != null) {
+                    minioClient.removeObject(RemoveObjectArgs.builder().bucket(loadDirectory).object(key).build());
                 }
             } catch (FileNotFoundException fileNotFoundException) {
                 log.info("Файл " + key + " не найден:\n" + fileNotFoundException.getLocalizedMessage());

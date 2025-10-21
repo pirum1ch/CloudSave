@@ -23,7 +23,7 @@ public class FileManager {
 
     //Директоря для загрузки. Подгружается из файла пропертей
     @Value("${directory.to.load}")
-    private String loadDiretory;
+    private String loadDirectory;
 
     /**
      * Загрузка файла. Для каждого файла генерится отдельный уникальный ключ, под которым он сохранятеся в облаке.
@@ -35,7 +35,7 @@ public class FileManager {
      * @throws InvalidPathException
      */
     public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
-        Path path = Paths.get(loadDiretory, key).toAbsolutePath();
+        Path path = Paths.get(loadDirectory, key).toAbsolutePath();
         log.info( "Адрес сохранения файла: " + path);
 
         Path file = Files.createFile(path);
@@ -59,7 +59,7 @@ public class FileManager {
      * @throws IOException
      */
     public Resource download(String key) throws IOException {
-        Path path = Paths.get(loadDiretory + key);
+        Path path = Paths.get(loadDirectory + key);
         log.info( "Адрес скачивания фалйа: " + path);
         Resource resource = new UrlResource(path.toUri());
         if (resource.exists() || resource.isReadable()) {
@@ -78,7 +78,7 @@ public class FileManager {
      * @throws IOException
      */
     public void deleteFile(String key) throws IOException {
-        Path path = Paths.get(loadDiretory + key);
+        Path path = Paths.get(loadDirectory + key);
         log.info( "Директория для удаления файла: " + path);
 
         Resource resource = new UrlResource(path.toUri());
