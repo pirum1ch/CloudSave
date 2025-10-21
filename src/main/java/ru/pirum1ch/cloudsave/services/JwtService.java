@@ -4,6 +4,8 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
+@Log4j2
 public class JwtService {
 
     private final TokenRepo tokenRepo;
@@ -26,9 +29,11 @@ public class JwtService {
         this.userRepo = userRepo;
     }
 
+    //TODO process to properties
     @Value("${token.signing.key}")
     private String jwtSigningKey;
 
+    //TODO process to properties
     //В данной конфигурации токен живет 10 минут
     @Value("${token.time.to.live}")
     private int tokenTimeToLive = 600000;
@@ -40,10 +45,8 @@ public class JwtService {
      * @param token токен
      * @return имя пользователя
      */
-    public String extractUserName(String token)
-    {
-        return extractClaim(token, Claims::getSubject);
-    }
+    public String extractUserName(String token) {
+        return extractClaim(token, Claims::getSubject);}
 
     /**
      * Генерация токена
@@ -67,7 +70,7 @@ public class JwtService {
      * @param userDetails данные пользователя
      * @return true, если токен валиден
      */
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails){
         final String userName = extractUserName(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
@@ -80,9 +83,8 @@ public class JwtService {
      * @param <T>             тип данных
      * @return данные
      */
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolvers.apply(claims);
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers){
+        return claimsResolvers.apply(extractAllClaims(token));
     }
 
     /**
@@ -127,13 +129,12 @@ public class JwtService {
      * @param token токен
      * @return данные
      */
-    private Claims extractAllClaims(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims;
+    private Claims extractAllClaims(String token){
+        return Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
     }
 
     /**

@@ -1,5 +1,7 @@
 package ru.pirum1ch.cloudsave.utils;
 
+
+import io.minio.MinioClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @Component
 @Log4j2
 public class FileManager {
+
     //Директоря для загрузки. Подгружается из файла пропертей
     @Value("${directory.to.load}")
     private String loadDiretory;
@@ -34,16 +36,16 @@ public class FileManager {
      */
     public void fileUpload(byte[] resource, String key) throws IOException, InvalidPathException {
         Path path = Paths.get(loadDiretory, key).toAbsolutePath();
-        log.log(Level.INFO, "Адрес сохранения файла: " + path);
+        log.info( "Адрес сохранения файла: " + path);
 
         Path file = Files.createFile(path);
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(file.toString());
             fileOutputStream.write(resource);
-            log.log(Level.INFO, "Файл загружен успешно!");
+            log.info( "Файл загружен успешно!");
         } finally {
-            log.log(Level.INFO, "Закрываем поток записи файла.");
+            log.info( "Закрываем поток записи файла.");
             assert fileOutputStream != null;
             fileOutputStream.close();
         }
@@ -58,10 +60,10 @@ public class FileManager {
      */
     public Resource download(String key) throws IOException {
         Path path = Paths.get(loadDiretory + key);
-        log.log(Level.INFO, "Адрес скачивания фалйа: " + path);
+        log.info( "Адрес скачивания фалйа: " + path);
         Resource resource = new UrlResource(path.toUri());
         if (resource.exists() || resource.isReadable()) {
-            log.log(Level.INFO, "Файл скачан успешно!");
+            log.info( "Файл скачан успешно!");
             return resource;
         } else {
             log.log(Level.ERROR, "Ошибка скачивания!");
@@ -77,12 +79,12 @@ public class FileManager {
      */
     public void deleteFile(String key) throws IOException {
         Path path = Paths.get(loadDiretory + key);
-        log.log(Level.INFO, "Директория для удаления файла: " + path);
+        log.info( "Директория для удаления файла: " + path);
 
         Resource resource = new UrlResource(path.toUri());
         if (resource.exists() || resource.isFile()) {
             Files.delete(path);
-            log.log(Level.INFO, "Удаляем файл из директории");
+            log.info( "Удаляем файл из директории");
         }
     }
 

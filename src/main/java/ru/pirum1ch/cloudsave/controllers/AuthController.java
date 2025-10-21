@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.controllers;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
@@ -30,7 +31,7 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<TokenAuthResponce> login(@RequestBody @Valid LoginRequest request) {
-        log.log(Level.INFO, "Попытка авторизации пользователя " + request.getLogin());
+        log.info( "Попытка авторизации пользователя " + request.getLogin());
         return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 
@@ -40,8 +41,8 @@ public class AuthController {
     return null;
     }
 
-//    @PostMapping("sign-up")
-//    public TokenAuthResponce signUp(@RequestBody @Valid SignRequest request) {
-//        return authService.signUp(request);
-//    }
+    @PostMapping("sign-up")
+    public TokenAuthResponce signUp(@RequestBody @Valid SignRequest request) {
+        return authService.signUp(request);
+    }
 }

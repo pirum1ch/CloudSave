@@ -47,7 +47,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        log.log(Level.INFO, "Конфигурируем SecurityFilterChain");
+        log.info("Конфигурируем SecurityFilterChain");
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> corsConfigurationSource())
@@ -63,14 +63,14 @@ public class SecurityConfiguration {
                         .logoutSuccessUrl("login")
                         .addLogoutHandler(customLogoutHandler)
                         .invalidateHttpSession(true)
-                                .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
-                        )
+                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                )
                 .build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        log.log(Level.INFO, "Конфигурируем CORS");
+        log.info("Конфигурируем CORS");
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:8081"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -78,6 +78,7 @@ public class SecurityConfiguration {
         corsConfiguration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
+        log.info("Конфигурирование CORS завершено");
         return source;
     }
 

@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonAutoDetect
 public class SignRequest {
-    private String email;
+    private String login;
+    private String name;
+    private String surname;
     private String password;
 }

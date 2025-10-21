@@ -1,10 +1,13 @@
 package ru.pirum1ch.cloudsave.configurations;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -39,7 +42,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+    ) throws ServletException, IOException, ExpiredJwtException {
 
         // Получаем токен из заголовка
         String authHeader = request.getHeader(HEADER_NAME);
@@ -50,7 +53,13 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         // Обрезаем префикс и получаем имя пользователя из токена
         String jwt = authHeader.substring(BEARER_PREFIX.length());
-        String username = jwtService.extractUserName(jwt);
+        String username = "";
+        try {
+            username = jwtService.extractUserName(jwt);
+        } catch (ExpiredJwtException expiredJwtException) {
+            log.info("JWT Token просрочен: {}", expiredJwtException.getLocalizedMessage());
+        }
+
         if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailService.loadUserByUsername(username);
 

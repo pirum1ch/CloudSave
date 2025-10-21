@@ -1,48 +1,59 @@
 package ru.pirum1ch.cloudsave.controllers;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.minio.errors.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
-import ru.pirum1ch.cloudsave.services.FileService;
+import ru.pirum1ch.cloudsave.services.MinioFileService;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @Log4j2
 @RequestMapping("/file")
 public class FileController {
 
-    private final FileService fileService;
+    private final MinioFileService fileService;
 
-    public FileController(FileService fileService) {
+    public FileController(MinioFileService fileService) {
         this.fileService = fileService;
     }
+
+//    @GetMapping
+//    public ResponseEntity<Page<File>> listFiles(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limitOfFiles,  @RequestParam(defaultValue = "id,asc") String[] sort){
+//        Sort sorting = Sort.by(sort[0]);
+//        Pageable pageable = PageRequest.of(page, limitOfFiles, sorting);
+//        Page<File> filePage = fileService.getListOfAllFiles(pageable);
+//        return ResponseEntity.ok(filePage);
+//    }
 
     /**
      * Загрузка файла в хранилище. Если загружается файл,
      * а в хранилище уже есть файл с таким именем - файл будет заменен
      *
-     * @param filename
      * @param file
      * @return
      */
 
     @PostMapping
-    public ResponseEntity<File> upload(@RequestParam("filename") String filename, @RequestParam MultipartFile file) throws IllegalArgumentException, IOException {
-        log.log(Level.INFO, "Загрузка файла начата");
-        if (fileService.getFileByName(filename) == null) {
-            log.log(Level.INFO, "Файл новый, загружаем.");
-            return new ResponseEntity<>(fileService.upload(filename, file), HttpStatus.OK);
-        } else {
-            log.log(Level.INFO, "Найден файл с аналогичным именем, обнволяем");
-            return new ResponseEntity<>(fileService.fileUpdateByName(filename, file), HttpStatus.OK);
-        }
+    public ResponseEntity<?> upload(@RequestParam MultipartFile[] file)
+            throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
+        fileService.upload(file);
+        return ResponseEntity.ok().body("File(s) has been uploaded successfully");
     }
 
     /**
@@ -52,10 +63,12 @@ public class FileController {
      * @return
      */
     @DeleteMapping
-    public ResponseEntity<File> delete(@RequestParam("filename") String fileName) throws IOException{
-        log.log(Level.INFO, "Удаление файла: " + fileName);
+    public ResponseEntity<?> delete(@RequestParam("filename") String fileName)
+            throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        log.info("Удаление файла: " + fileName);
         fileService.deleteFile(fileName);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Файл удален", HttpStatus.OK);
     }
 
     /**
@@ -65,12 +78,14 @@ public class FileController {
      * @return
      */
     @GetMapping
-    public ResponseEntity<Resource> downloadFile(@RequestParam("filename") String fileName) throws IllegalArgumentException, IOException {
-        log.log(Level.INFO, "Скачиваем файл: " + fileName);
-        Resource resource = fileService.download(fileName);
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + resource.getFilename())
-                .body(resource);
+    public ResponseEntity<?> downloadFile(@RequestParam("filename") String fileName)
+            throws IllegalArgumentException, IOException, ServerException, InsufficientDataException,
+            ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
+        //TODO if file exists
+        log.debug("Скачиваем файл: " + fileName);
+        fileService.download(fileName);
+        return new ResponseEntity<>("Файл " + fileName + " скачан", HttpStatus.OK);
     }
 
     /**
@@ -82,7 +97,7 @@ public class FileController {
      */
     @PutMapping
     public ResponseEntity<File> fileNameUpdate(@RequestParam("filename") String fileName, @RequestBody String name) throws IllegalArgumentException, IOException {
-        log.log(Level.INFO, "Изменяем имя для файла: " + fileName);
+        log.info("Изменяем имя для файла: " + fileName);
         return new ResponseEntity<>(fileService.fileNameUpdate(fileName, name), HttpStatus.OK);
     }
 }

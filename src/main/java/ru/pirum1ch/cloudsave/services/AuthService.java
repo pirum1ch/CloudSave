@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.pirum1ch.cloudsave.dto.requests.LoginRequest;
@@ -14,6 +15,8 @@ import ru.pirum1ch.cloudsave.dto.requests.SignRequest;
 import ru.pirum1ch.cloudsave.dto.responces.TokenAuthResponce;
 import ru.pirum1ch.cloudsave.models.Token;
 import ru.pirum1ch.cloudsave.models.User;
+
+import java.util.UUID;
 
 @Service
 @Log4j2
@@ -25,45 +28,54 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public TokenAuthResponce login(LoginRequest request) throws BadCredentialsException {
+    public TokenAuthResponce login(LoginRequest request) throws BadCredentialsException, UsernameNotFoundException {
         String token;
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         UserDetails user = customUserDetailService.loadUserByUsername(request.getLogin());
 //        Token tokenEntity = jwtService.getActualToken(request.getLogin());
-        //Получаем токен последний актуальный токен (в теории он может быть только один)
+
+        //Получаем последний актуальный токен (в теории он может быть только один)
         token = jwtService.getActualToken(request.getLogin());
 
+        //TODO take away to new method
         //Если токена нет
         if (token == null) {
             //выпускаем новый
             token = jwtService.generateToken(user);
             //И сохраняем его в БД
             jwtService.storeToken(token, request.getLogin());
-        }
-
-        //Проверяем не закончен ли его срок действия
-        try{
-            jwtService.isTokenExpired(token);
-            //Если ловим ошибку по сроку действия
-        }catch (ExpiredJwtException expiredJwtException){
-            //Помечаем его просроченным
-            jwtService.setTokenDead(token);
-            //Выпускаем новый токен
-            token = jwtService.generateToken(user);
-            //Сохраняем его в БД как действующий
-            jwtService.storeToken(token, request.getLogin());
+        }else {
+            //Проверяем не закончен ли его срок действия
+            try {
+                jwtService.isTokenExpired(token);
+                //Если ловим ошибку по сроку действия
+            } catch (ExpiredJwtException expiredJwtException) {
+                //Помечаем его просроченным
+                jwtService.setTokenDead(token);
+                //Выпускаем новый токен
+                token = jwtService.generateToken(user);
+                //Сохраняем его в БД как действующий
+                jwtService.storeToken(token, request.getLogin());
+            }
         }
         return new TokenAuthResponce(token);
     }
 
     public TokenAuthResponce signUp(SignRequest request) {
+        //TODO add check for existing user
+        //TODO add a userName
         User user = User.builder()
-                .email(request.getEmail())
+                .email(request.getLogin())
+                .login(request.getLogin())
+                .name(request.getName())
+                .surname(request.getSurname())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
-
+        customUserDetailService.saveUser(user);
         String token = jwtService.generateToken(user);
+        jwtService.storeToken(token, request.getLogin());
+
         return new TokenAuthResponce(token);
     }
 
