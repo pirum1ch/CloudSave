@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @Log4j2
@@ -51,7 +52,7 @@ public class FileController {
 
     @PostMapping
     public ResponseEntity<?> upload(@RequestParam MultipartFile[] file)
-            throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
+            throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException, ExecutionException, InterruptedException {
         fileService.upload(file);
         return ResponseEntity.ok().body("File(s) has been uploaded successfully");
     }

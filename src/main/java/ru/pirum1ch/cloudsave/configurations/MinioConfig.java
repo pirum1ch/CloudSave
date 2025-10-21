@@ -1,5 +1,6 @@
 package ru.pirum1ch.cloudsave.configurations;
 
+import io.minio.MinioAsyncClient;
 import io.minio.MinioClient;
 import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,18 @@ public class MinioConfig {
                     .build();
         }catch (Exception exception){
             throw new MinioException("Ошибка инициализации клиента Minio");
+        }
+    }
+
+    @Bean
+    public MinioAsyncClient minioAsyncClient() throws MinioException{
+        try {
+            return MinioAsyncClient.builder()
+                    .endpoint(minioUrl)
+                    .credentials(minioAccessName, minioAccessSecret)
+                    .build();
+        }catch (Exception exception){
+            throw new MinioException("Ошибка инициализации Async клиента Minio");
         }
     }
 

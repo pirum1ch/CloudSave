@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Level;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 
 
 @Service
@@ -45,33 +49,38 @@ public class MinioFileService {
         return fileListRepo.findAll(pageable);
     }
 
+    @Async("taskExecutor")
     @Transactional(rollbackFor = {IOException.class, MinioException.class, NoSuchAlgorithmException.class, InvalidKeyException.class})
     public void upload(@NonNull MultipartFile[] multiFile)
-            throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
+            throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException, ExecutionException, InterruptedException {
 
         for (MultipartFile file : multiFile) {
-            String fileName = file.getOriginalFilename();
-            String key = fileManager.generateKey(fileName);
+            try {
+                String fileName = file.getOriginalFilename();
+                String key = fileManager.generateKey(fileName);
 
-            if (fileRepo.findByName(fileName) != null) {
-                log.info("Файл с таким именем уже есть");
-                fileName = new StringBuilder(fileName)
-                        .insert(fileName.indexOf("."), "_" + new SimpleDateFormat("HH:mm:ss")
-                                .format(new Date().getTime()))
-                        .toString();
+                if (fileRepo.findByName(fileName) != null) {
+                    log.info("Файл с таким именем уже есть");
+                    fileName = new StringBuilder(fileName)
+                            .insert(fileName.indexOf("."), "_" + new SimpleDateFormat("HH:mm:ss")
+                                    .format(new Date().getTime()))
+                            .toString();
+                }
+
+                File uploadedFile = File.builder()
+                        .name(fileName)
+                        .key(key)
+                        .size(file.getSize())
+                        .extention(file.getContentType())
+                        .uploadDate(new Date())
+                        .build();
+                log.debug("Создали новый объект файла: \n" + uploadedFile);
+                fileManager.minioUpload(file, key);
+                fileRepo.save(uploadedFile);
+                log.info("Файл сохранен успешно");
+            }catch (Exception e){
+                log.info(e.getLocalizedMessage());
             }
-
-            File uploadedFile = File.builder()
-                    .name(fileName)
-                    .key(key)
-                    .size(file.getSize())
-                    .extention(file.getContentType())
-                    .uploadDate(new Date())
-                    .build();
-            log.debug("Создали новый объект файла: \n" + uploadedFile);
-            fileManager.minioUpload(file, key);
-            fileRepo.save(uploadedFile);
-            log.info("Файл сохранен успешно");
         }
     }
 
