@@ -11,6 +11,7 @@ import ru.pirum1ch.cloudsave.configurations.AsyncConfig;
 import ru.pirum1ch.cloudsave.configurations.MinioConfig;
 import ru.pirum1ch.cloudsave.models.File;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -20,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 
 @Component
@@ -48,18 +50,18 @@ public class MinioFileManager {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      */
-    public void minioUpload(MultipartFile file, String key) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
+    public void minioUpload(byte [] file, String contentType, String key) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
         //TODO Return a name of bucket
         log.info("Сохраняем файл в minio: " + loadDirectory);
 
-//        Executor executor = new AsyncConfig().taskExecutor();
-//        executor.execute(() -> new MinioConcurecncyFileUpload(minioAsyncClient, file, key).run());
-        minioAsyncClient.putObject(PutObjectArgs.builder()
-                .bucket(loadDirectory)
-                .object(key)
-                .contentType(file.getContentType())
-                .stream(file.getInputStream(), file.getSize(), -1)
-                .build());
+        Executor executor = new AsyncConfig().taskExecutor();
+        executor.execute(() -> new MinioConcurecncyFileUpload(minioAsyncClient, file, contentType, key).run());
+//        minioAsyncClient.putObject(PutObjectArgs.builder()
+//                .bucket(loadDirectory)
+//                .object(key)
+//                .contentType(contentType)
+//                .stream(new ByteArrayInputStream(file), file.length, -1)
+//                .build());
 //        minioClient.putObject(PutObjectArgs.builder().
 //                bucket(loadDiretory).
 //                object(key).

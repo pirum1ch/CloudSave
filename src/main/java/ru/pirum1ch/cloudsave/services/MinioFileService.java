@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
@@ -25,10 +26,14 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.stream;
 
 
 @Service
@@ -56,8 +61,12 @@ public class MinioFileService {
 
         for (MultipartFile file : multiFile) {
             try {
+                byte [] fileByte = file.getInputStream().readAllBytes();
+                String contentType = file.getContentType();
+                long fileSize = file.getSize();
                 String fileName = file.getOriginalFilename();
-                String key = fileManager.generateKey(fileName);
+//                String key = fileManager.generateKey(fileName);
+                String key = DigestUtils.md5DigestAsHex((fileName + LocalDateTime.now()).getBytes());
 
                 if (fileRepo.findByName(fileName) != null) {
                     log.info("Файл с таким именем уже есть");
@@ -70,12 +79,12 @@ public class MinioFileService {
                 File uploadedFile = File.builder()
                         .name(fileName)
                         .key(key)
-                        .size(file.getSize())
-                        .extention(file.getContentType())
+                        .size(fileSize)
+                        .extention(contentType)
                         .uploadDate(new Date())
                         .build();
                 log.debug("Создали новый объект файла: \n" + uploadedFile);
-                fileManager.minioUpload(file, key);
+                fileManager.minioUpload(fileByte, contentType, key);
                 fileRepo.save(uploadedFile);
                 log.info("Файл сохранен успешно");
             }catch (Exception e){
