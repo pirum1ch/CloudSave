@@ -68,6 +68,8 @@ public class MinioFileService {
 //                String key = fileManager.generateKey(fileName);
                 String key = DigestUtils.md5DigestAsHex((fileName + LocalDateTime.now()).getBytes());
 
+                //Проверям есть ли такой файл в хранилище, если есть - меняем имя на Имя_дата
+//                TODO проверять имя только у текущего пользователя
                 if (fileRepo.findByName(fileName) != null) {
                     log.info("Файл с таким именем уже есть");
                     fileName = new StringBuilder(fileName)

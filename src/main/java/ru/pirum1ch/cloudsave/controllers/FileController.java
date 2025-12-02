@@ -44,12 +44,11 @@ public class FileController {
 
     /**
      * Загрузка файла в хранилище. Если загружается файл,
-     * а в хранилище уже есть файл с таким именем - файл будет заменен
+     * а в хранилище уже есть файл с таким именем - файл будет добвлен, а имя изменено
      *
      * @param file
      * @return
      */
-
     @PostMapping
     public ResponseEntity<?> upload(@RequestParam MultipartFile[] file)
             throws IllegalArgumentException, IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException, ExecutionException, InterruptedException {
