@@ -1,11 +1,6 @@
 package ru.pirum1ch.cloudsave.models;
 
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
 import java.util.Objects;
@@ -38,6 +33,10 @@ public class File {
 
     @Column(name = "upload_date")
     private Date uploadDate;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name="users_id", nullable = false)
+    private User owner;
 
 
     @Override

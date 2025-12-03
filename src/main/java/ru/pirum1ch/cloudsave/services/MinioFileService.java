@@ -3,11 +3,8 @@ package ru.pirum1ch.cloudsave.services;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.minio.errors.*;
 import jakarta.persistence.PersistenceException;
-import jakarta.validation.constraints.Min;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -15,12 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
-import ru.pirum1ch.cloudsave.dto.FileDto;
 import ru.pirum1ch.cloudsave.models.File;
 import ru.pirum1ch.cloudsave.repositories.FileListRepo;
 import ru.pirum1ch.cloudsave.repositories.FileRepo;
 import ru.pirum1ch.cloudsave.utils.MinioFileManager;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -29,11 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
-import static java.util.Arrays.stream;
 
 
 @Service
@@ -58,7 +49,7 @@ public class MinioFileService {
     @Transactional(rollbackFor = {IOException.class, MinioException.class, NoSuchAlgorithmException.class, InvalidKeyException.class})
     public void upload(@NonNull MultipartFile[] multiFile)
             throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException, ExecutionException, InterruptedException {
-
+//TODO указывать ID пользователя
         for (MultipartFile file : multiFile) {
             try {
                 byte [] fileByte = file.getInputStream().readAllBytes();

@@ -52,8 +52,8 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer -> corsConfigurationSource())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/sign-up", "/logout").permitAll()
-                        .requestMatchers("/**").authenticated()
+                        .requestMatchers("/login", "/signup", "/logout").permitAll()
+                        .requestMatchers("/**", "/user").authenticated()
                 )
                 .authenticationProvider(authProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

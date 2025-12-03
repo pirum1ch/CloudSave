@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.pirum1ch.cloudsave.dto.UserDto;
 import ru.pirum1ch.cloudsave.dto.requests.LoginRequest;
 import ru.pirum1ch.cloudsave.dto.requests.SignRequest;
 import ru.pirum1ch.cloudsave.dto.responces.TokenAuthResponce;
@@ -25,8 +26,8 @@ public class AuthService {
 
     private final CustomUserDetailService customUserDetailService;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     public TokenAuthResponce login(LoginRequest request) throws BadCredentialsException, UsernameNotFoundException {
         String token;
@@ -62,21 +63,16 @@ public class AuthService {
         return new TokenAuthResponce(token);
     }
 
-    public TokenAuthResponce signUp(SignRequest request) {
-        //TODO add check for existing user
-        //TODO add a userName
-        User user = User.builder()
-                .email(request.getLogin())
-                .login(request.getLogin())
-                .name(request.getName())
-                .surname(request.getSurname())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
-        customUserDetailService.saveUser(user);
-        String token = jwtService.generateToken(user);
-        jwtService.storeToken(token, request.getLogin());
-
-        return new TokenAuthResponce(token);
+    public User signUp(SignRequest request){
+        User newUser = null;
+        try {
+            newUser = userService.addNewUser(request.getEmail(), request.getLogin(), request.getName(), request.getSurname(), request.getPassword());
+            String token = jwtService.generateToken(userService.getUser(newUser.getEmail()));
+            jwtService.storeToken(token, request.getEmail());
+        }catch (IllegalArgumentException | NullPointerException exception){
+            exception.fillInStackTrace();
+        }
+        return newUser;
     }
 
     public TokenAuthResponce logout(LoginRequest request){

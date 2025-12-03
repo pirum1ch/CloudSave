@@ -35,14 +35,23 @@ public class AuthController {
         return new ResponseEntity<> (authService.login(request), HttpStatus.OK);
     }
 
+    //TODO доделать логаут с отзывом токена
     @PostMapping("logout")
     public ResponseEntity<TokenAuthResponce> logout() {
 //        return new ResponseEntity<> (authService.logout(request), HttpStatus.OK);
     return null;
     }
 
-    @PostMapping("sign-up")
-    public TokenAuthResponce signUp(@RequestBody @Valid SignRequest request) {
-        return authService.signUp(request);
+    @PostMapping("signup")
+    public ResponseEntity<TokenAuthResponce> signUp(@RequestBody @Valid SignRequest request){
+        LoginRequest loginRequest = new LoginRequest();
+        TokenAuthResponce token = null;
+        if(authService.signUp(request) != null){
+            loginRequest.setLogin(request.getEmail());
+            loginRequest.setPassword(request.getPassword());
+//            TODO Почему пробрасывается BacCredential при передаче loginRequest?
+            token = authService.login(loginRequest);
+        }
+        return new ResponseEntity<> (token, HttpStatus.OK);
     }
 }
